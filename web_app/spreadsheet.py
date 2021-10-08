@@ -17,7 +17,11 @@ SCOPES = [
 
 class Spreadsheet():
     def __init__(self):
-        self.credentials = json.loads(CREDS)
+        if CREDS:
+            self.credentials = json.loads(CREDS)
+        else:
+            current_app.logger.error('GOOGLE_API_CREDENTIALS is undefined.')
+            abort(500, 'GOOGLE_API_CREDENTIALS is undefined.')
         self.client = gspread.service_account_from_dict(self.credentials, scopes=SCOPES)
         self.sheet_id = DOCUMENT_ID
         self.sheet_name = None
