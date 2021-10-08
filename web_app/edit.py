@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from flask import Blueprint, jsonify, current_app, request, flash
+from flask import Blueprint, jsonify, current_app, request
 
 bp = Blueprint('edit', __name__, url_prefix='/edit')
 
