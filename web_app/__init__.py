@@ -12,13 +12,14 @@ from web_app.flask_logs import LogSetup
 load_dotenv()
 
 def create_app(test_config=None):
+    """Flask app configuration"""
     app = Flask(__name__, instance_relative_config=True)
 
     # config app
     app.config.from_mapping(
         SECRET_KEY = os.environ.get("SECRET_KEY"),
         ENV = os.environ.get("FLASK_ENV"),
-        SPREADSHEET_OBJ = spreadsheet.Spreadsheet(),
+        SPREADSHEET_OBJ = spreadsheet.Spreadsheet(app),
         # logging
         LOG_DIR = os.environ.get("LOG_DIR", "./"),
         LOG_TYPE = os.environ.get("LOG_TYPE", "stream"),
@@ -29,6 +30,17 @@ def create_app(test_config=None):
         LOG_COPIES = os.environ.get("LOG_COPIES", 5)
     )
 
+    if test_config is None:
+        app.config.from_pyfile('config.py', silent=True)
+    else:
+        app.config.from_mapping(test_config)
+
+    try:
+        os.makedirs(app.instance_path)
+    except OSError:
+        pass
+
+    # setup logging
     logs = LogSetup(app)
 
     @app.after_request
@@ -49,16 +61,6 @@ def create_app(test_config=None):
         )
 
         return response
-
-    if test_config is None:
-        app.config.from_pyfile('config.py', silent=True)
-    else:
-        app.config.from_mapping(test_config)
-
-    try:
-        os.makedirs(app.instance_path)
-    except OSError:
-        pass
 
     @app.route('/')
     def hello():
