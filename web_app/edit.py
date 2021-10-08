@@ -23,14 +23,16 @@ def append_row(sheet_name, sheet_range):
 
     # reason: income or expense
     reason = payload.get('reason', '-')
-    if payload.get('amount'):
-        if payload['amount'] < 0:
-            values.extend([reason, '-'])
-        else:
-            values.extend(['-', reason])
+    amount = payload.get('amount', 0.0)
+    if payload['amount'] < 0:
+        values.extend([reason, '-'])
+    elif amount > 0:
+        values.extend(['-', reason])
+    else:
+        current_app.logger.warning("A zero amount in request payload. Might it be a mistake client-side?")
+        values.extend(['(zero amount)', '(zero amount)'])
     
     # amount and which currency
-    amount = payload.get('amount', 0.0)
     if payload.get('currency') == "CHF":
         values.extend([amount, 0.0])
     else:
