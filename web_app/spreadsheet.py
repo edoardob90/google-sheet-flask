@@ -10,7 +10,6 @@ from gspread.exceptions import APIError
 load_dotenv()
 
 DOCUMENT_ID = os.environ.get('GOOGLE_SHEET_ID')
-CREDS = os.environ.get('GOOGLE_API_CREDENTIALS')
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
 ]
@@ -19,8 +18,11 @@ class Spreadsheet():
     """A class for a Google Spreasheet object"""
     def __init__(self, app):
         self.current_app = app
-        if CREDS:
-            self.credentials = json.loads(CREDS)
+        if os.path.exists('./creds.json'):
+            with open('./creds.json', mode='r', encoding='utf-8') as fp:
+                self.credentials = json.load(fp)
+        elif (creds := os.environ.get('GOOGLE_API_CREDENTIALS', None)):
+            self.credentials = json.loads(creds)
         else:
             self.current_app.logger.error('GOOGLE_API_CREDENTIALS is undefined.')
             abort(500, 'GOOGLE_API_CREDENTIALS is undefined.')
