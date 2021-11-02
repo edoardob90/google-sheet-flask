@@ -13,8 +13,8 @@ def append_row(sheet_name, sheet_range):
     if sheet_name:
         spreadsheet.sheet_name = sheet_name
     else:
-        current_app.logger.error("sheet_name must be given.")
-        return jsonify({"response_success": False, "response_message": "`sheet_name` must be given."})
+        current_app.logger.error("Sheet name must be given.")
+        return jsonify({"response_success": False, "response_message": "Sheet name must be given."})
     
     payload = request.get_json()
     
@@ -23,20 +23,21 @@ def append_row(sheet_name, sheet_range):
 
     # reason: income or expense
     reason = payload.get('reason', '-')
-    amount = payload.get('amount', 0.0)
-    if payload['amount'] < 0:
-        values.extend([reason, '-'])
-    elif amount > 0:
-        values.extend(['-', reason])
+    amount = payload.get('amount', None)
+    if amount:
+        if amount < 0:
+            values.extend([reason, '-'])
+        elif amount > 0:
+            values.extend(['-', reason])
+        else:
+            current_app.logger.warning("A zero amount in request payload. Might it be a mistake client-side?")
+            values.extend(['(zero amount)', '(zero amount)'])
     else:
-        current_app.logger.warning("A zero amount in request payload. Might it be a mistake client-side?")
-        values.extend(['(zero amount)', '(zero amount)'])
+        current_app.logger.error("'amount' cannot be none")
+        values.extend(['ERROR', 'ERROR'])
     
     # amount and which currency
-    if payload.get('currency') == "CHF":
-        values.extend([amount, 0.0])
-    else:
-        values.extend([0.0, amount])
+    values.extend([amount, payload.get('currency', '-')])
 
     # bank account charged
     values.append(payload.get('account', '-'))
