@@ -5,3 +5,5 @@ __pycache__
 *.json
 *.code-workspace
 google_envs
+.secrets
+creds.json

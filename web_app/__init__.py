@@ -1,12 +1,9 @@
 import logging
 import os
 from datetime import datetime as dt
-
 from dotenv import load_dotenv
-
 from flask import Flask, request
-
-from web_app import spreadsheet, edit
+from web_app import spreadsheet, edit, telegram
 from web_app.flask_logs import LogSetup
 
 load_dotenv()
@@ -66,7 +63,10 @@ def create_app(test_config=None):
     def hello():
         return "Hello, World!"
 
-    # register blueprints
-    app.register_blueprint(edit.bp)
+    # Edit blueprint
+    app.register_blueprint(edit.bp, url_prefix='/edit')
+
+    # Telegram blueprint
+    app.register_blueprint(telegram.bp)
 
     return app
