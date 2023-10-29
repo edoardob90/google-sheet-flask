@@ -1,0 +1,24 @@
+{% extends "base.html" %} {% block content %} {% block styles %} {{
+bootstrap.load_css() }}
+<style>
+  ul {
+    padding: 0;
+    list-style-type: none;
+  }
+  li {
+    display: inline;
+    margin-right: 1em;
+  }
+</style>
+{% endblock %}
+<h1>Google Sheets Flask</h1>
+<p>
+  Hello! This is a simple Flask app that exposes an API to manage your finance
+  tracker on Google Sheets.
+</p>
+<p>Here's what you can do:</p>
+<ul>
+  <li><a href="{{ url_for('user.new_user') }}">Create a new user</a></li>
+  <li><a href="/">Delete a user</a></li>
+</ul>
+{% endblock %}

@@ -1,0 +1,4 @@
+{% extends 'base.html' %} {% from 'bootstrap4/form.html' import render_form %}
+{% block content %}
+<form method="POST">{{ render_form(form) }}</form>
+{% endblock %}

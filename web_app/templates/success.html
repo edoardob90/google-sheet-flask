@@ -1,0 +1,9 @@
+{% extends "base.html" %} {% block content %}
+<h1>Success!</h1>
+<p>
+  Thank you, {{ user_name }}. Your registered with email {{ user_email }}. Your
+  unique ID is
+  <code>{{ user_id }}</code>. Keep it safe!
+</p>
+<p><a href="/">Back</a></p>
+{% endblock %}

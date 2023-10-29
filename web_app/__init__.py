@@ -1,37 +1,47 @@
 import logging
 import os
+import pathlib as pl
 from datetime import datetime as dt
 
 from dotenv import load_dotenv
+from flask import Flask, render_template, request
+from flask_bootstrap import Bootstrap4 as Bootstrap
 
-from flask import Flask, request
-
-from web_app import spreadsheet, edit
+from web_app import user
 from web_app.flask_logs import LogSetup
+from web_app.models import Users
+from web_app.spreadsheet import Spreadsheet
 
 load_dotenv()
 
+APP_DIR = pl.Path(__file__).parent
+
+
 def create_app(test_config=None):
     """Flask app configuration"""
+    # Setup app
     app = Flask(__name__, instance_relative_config=True)
+    Bootstrap(app)
 
-    # config app
+    # Config app
     app.config.from_mapping(
-        SECRET_KEY = os.environ.get("SECRET_KEY"),
-        ENV = os.environ.get("FLASK_ENV"),
-        SPREADSHEET_OBJ = spreadsheet.Spreadsheet(app),
+        APP_DIR=APP_DIR,
+        SECRET_KEY=os.environ.get("SECRET_KEY"),
+        ENV=os.environ.get("FLASK_ENV"),
+        USERS=Users(),
+        SPREADSHEET_OBJ=Spreadsheet(APP_DIR.parent / "service_account.json"),
         # logging
-        LOG_DIR = os.environ.get("LOG_DIR", "./"),
-        LOG_TYPE = os.environ.get("LOG_TYPE", "stream"),
-        LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO"),
-        APP_LOG_NAME = os.environ.get("APP_LOG_NAME", "app.log"),
-        WWW_LOG_NAME = os.environ.get("WWW_LOG_NAME", "www.log"),
-        LOG_MAX_BYTES = os.environ.get("LOG_MAX_BYTES", 100_000_000), # 100 MB
-        LOG_COPIES = os.environ.get("LOG_COPIES", 5)
+        LOG_DIR=os.environ.get("LOG_DIR", "./"),
+        LOG_TYPE=os.environ.get("LOG_TYPE", "stream"),
+        LOG_LEVEL=os.environ.get("LOG_LEVEL", "INFO"),
+        APP_LOG_NAME=os.environ.get("APP_LOG_NAME", "app.log"),
+        WWW_LOG_NAME=os.environ.get("WWW_LOG_NAME", "www.log"),
+        LOG_MAX_BYTES=os.environ.get("LOG_MAX_BYTES", 100_000_000),  # 100 MB
+        LOG_COPIES=os.environ.get("LOG_COPIES", 5),
     )
 
     if test_config is None:
-        app.config.from_pyfile('config.py', silent=True)
+        app.config.from_pyfile("config.py", silent=True)
     else:
         app.config.from_mapping(test_config)
 
@@ -40,8 +50,8 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    # setup logging
-    logs = LogSetup(app)
+    # Setup logging
+    LogSetup(app)
 
     @app.after_request
     def after_request(response):
@@ -57,16 +67,17 @@ def create_app(test_config=None):
             response.status,
             response.content_length,
             request.referrer,
-            request.user_agent
+            request.user_agent,
         )
 
         return response
 
-    @app.route('/')
-    def hello():
-        return "Hello, World!"
+    # Routes
+    @app.route("/")
+    def index():
+        return render_template("index.html")
 
-    # register blueprints
-    app.register_blueprint(edit.bp)
+    # Register blueprints
+    app.register_blueprint(user.bp)
 
     return app

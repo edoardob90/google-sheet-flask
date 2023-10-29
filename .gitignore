@@ -5,3 +5,6 @@ __pycache__
 *.json
 *.code-workspace
 google_envs
+.venv
+.env
+___*.py
